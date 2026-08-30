@@ -6,12 +6,15 @@ import com.example.transactionstarter.transaction.dto.UpdateTransactionStatusReq
 import com.example.transactionstarter.transaction.entity.Transaction;
 import com.example.transactionstarter.transaction.service.TransactionService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@Validated
 @RequestMapping("/api/transactions")
 public class TransactionController {
 
@@ -55,7 +58,7 @@ public class TransactionController {
 
     @GetMapping
     public List<TransactionResponse> getCustomerTransactions(
-            @RequestParam String customerId) {
+            @RequestParam @NotBlank String customerId) {
 
         return transactionService.getCustomerTransactions(customerId)
                 .stream()

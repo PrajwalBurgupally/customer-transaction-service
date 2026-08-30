@@ -5,6 +5,7 @@ import com.example.transactionstarter.transaction.dto.UpdateTransactionStatusReq
 import com.example.transactionstarter.transaction.entity.Transaction;
 import com.example.transactionstarter.transaction.enums.Currency;
 import com.example.transactionstarter.transaction.enums.TransactionStatus;
+import com.example.transactionstarter.transaction.enums.TransactionType;
 import com.example.transactionstarter.transaction.exception.DuplicateTransactionException;
 import com.example.transactionstarter.transaction.exception.InvalidTransactionException;
 import com.example.transactionstarter.transaction.exception.TransactionNotFoundException;
@@ -31,7 +32,7 @@ public class TransactionService {
         checkForDuplicateTransactionId(request.getTransactionId());
         validateAmount(request.getAmount());
         validateCurrency(request.getCurrency());
-        validateTransactionType(request);
+        validateTransactionType(request.getTransactionType());
 
         Transaction transaction = new Transaction();
 
@@ -139,9 +140,9 @@ public class TransactionService {
         }
     }
 
-    private void validateTransactionType(CreateTransactionRequest request) {
+    private void validateTransactionType(TransactionType transactionType) {
 
-        if (request.getTransactionType() == null) {
+        if (transactionType == null) {
             throw new InvalidTransactionException(
                     "Transaction type is required"
             );
