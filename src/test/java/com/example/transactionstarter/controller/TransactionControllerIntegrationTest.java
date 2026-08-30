@@ -377,4 +377,40 @@ class TransactionControllerIntegrationTest {
                 .andExpect(jsonPath("$.transactionId").value("TXN-TEST-014"))
                 .andExpect(jsonPath("$.transactionStatus").value("FAILED"));
     }
+
+    @Test
+    void rejectStatusUpdateWhenStatusIsMissing() throws Exception {
+
+        String createRequest = """
+                {
+                    "transactionId": "TXN-TEST-015",
+                    "customerId": "CUST-TEST-015",
+                    "amount": 2000.00,
+                    "currency": "INR",
+                    "transactionType": "PAYMENT"
+                }
+                """;
+
+        mockMvc.perform(
+                        post("/api/transactions")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(createRequest)
+                )
+                .andExpect(status().isCreated());
+
+        String statusRequest = """
+                {
+                }
+                """;
+
+        mockMvc.perform(
+                        patch("/api/transactions/TXN-TEST-015/status")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(statusRequest)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message")
+                        .value("status: must not be null"));
+    }
 }
