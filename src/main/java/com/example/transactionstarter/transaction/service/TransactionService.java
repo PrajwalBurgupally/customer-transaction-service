@@ -1,6 +1,7 @@
 package com.example.transactionstarter.transaction.service;
 
 import com.example.transactionstarter.transaction.dto.CreateTransactionRequest;
+import com.example.transactionstarter.transaction.dto.UpdateTransactionStatusRequest;
 import com.example.transactionstarter.transaction.entity.Transaction;
 import com.example.transactionstarter.transaction.enums.Currency;
 import com.example.transactionstarter.transaction.enums.TransactionStatus;
@@ -11,6 +12,7 @@ import com.example.transactionstarter.transaction.repository.TransactionReposito
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 public class TransactionService {
@@ -96,5 +98,47 @@ public class TransactionService {
                                 "Transaction not found: " + transactionId
                         )
                 );
+    }
+
+    public Transaction updateTransactionStatus(
+            String transactionId,
+            UpdateTransactionStatusRequest request) {
+
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() ->
+                        new TransactionNotFoundException(
+                                "Transaction not found: " + transactionId
+                        )
+                );
+
+        TransactionStatus currentStatus = transaction.getTransactionStatus();
+        TransactionStatus requestedStatus = request.getStatus();
+
+        if (!isValidStatusTransition(currentStatus, requestedStatus)) {
+            throw new InvalidTransactionException(
+                    "Invalid status transition from "
+                            + currentStatus
+                            + " to "
+                            + requestedStatus
+            );
+        }
+
+        transaction.setTransactionStatus(requestedStatus);
+
+        return transactionRepository.save(transaction);
+    }
+
+    public List<Transaction> getCustomerTransactions(String customerId) {
+
+        return transactionRepository.findByCustomerId(customerId);
+    }
+
+    private boolean isValidStatusTransition(
+            TransactionStatus currentStatus,
+            TransactionStatus requestedStatus) {
+
+        return currentStatus == TransactionStatus.PENDING
+                && (requestedStatus == TransactionStatus.COMPLETED
+                || requestedStatus == TransactionStatus.FAILED);
     }
 }
