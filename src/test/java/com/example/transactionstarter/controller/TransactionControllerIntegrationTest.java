@@ -294,4 +294,87 @@ class TransactionControllerIntegrationTest {
                 .andExpect(jsonPath("$.message")
                         .value("Request contains invalid or unreadable data"));
     }
+
+    @Test
+    void createTransactionWithMinimumAmount() throws Exception {
+
+        String requestBody = """
+                {
+                    "transactionId": "TXN-TEST-012",
+                    "customerId": "CUST-TEST-012",
+                    "amount": 1.00,
+                    "currency": "INR",
+                    "transactionType": "PAYMENT"
+                }
+                """;
+
+        mockMvc.perform(
+                        post("/api/transactions")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(requestBody)
+                )
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.amount").value(1.00))
+                .andExpect(jsonPath("$.transactionStatus").value("PENDING"));
+    }
+
+    @Test
+    void createTransactionWithMaximumAmount() throws Exception {
+
+        String requestBody = """
+                {
+                    "transactionId": "TXN-TEST-013",
+                    "customerId": "CUST-TEST-013",
+                    "amount": 100000.00,
+                    "currency": "INR",
+                    "transactionType": "PAYMENT"
+                }
+                """;
+
+        mockMvc.perform(
+                        post("/api/transactions")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(requestBody)
+                )
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.amount").value(100000.00))
+                .andExpect(jsonPath("$.transactionStatus").value("PENDING"));
+    }
+
+    @Test
+    void updateTransactionStatusFromPendingToFailed() throws Exception {
+
+        String createRequest = """
+                {
+                    "transactionId": "TXN-TEST-014",
+                    "customerId": "CUST-TEST-014",
+                    "amount": 3000.00,
+                    "currency": "INR",
+                    "transactionType": "PAYMENT"
+                }
+                """;
+
+        mockMvc.perform(
+                        post("/api/transactions")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(createRequest)
+                )
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.transactionStatus").value("PENDING"));
+
+        String statusRequest = """
+                {
+                    "status": "FAILED"
+                }
+                """;
+
+        mockMvc.perform(
+                        patch("/api/transactions/TXN-TEST-014/status")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(statusRequest)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.transactionId").value("TXN-TEST-014"))
+                .andExpect(jsonPath("$.transactionStatus").value("FAILED"));
+    }
 }
