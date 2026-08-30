@@ -25,6 +25,20 @@ public class TransactionController {
 
         Transaction transaction = transactionService.createTransaction(request);
 
+        return toResponse(transaction);
+    }
+
+    @GetMapping("/{transactionId}")
+    public TransactionResponse getTransaction(
+            @PathVariable String transactionId) {
+
+        Transaction transaction = transactionService.getTransaction(transactionId);
+
+        return toResponse(transaction);
+    }
+
+    private TransactionResponse toResponse(Transaction transaction) {
+
         return new TransactionResponse(
                 transaction.getTransactionId(),
                 transaction.getCustomerId(),
