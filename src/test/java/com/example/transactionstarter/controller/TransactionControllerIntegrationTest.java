@@ -413,4 +413,13 @@ class TransactionControllerIntegrationTest {
                 .andExpect(jsonPath("$.message")
                         .value("status: must not be null"));
     }
+    @Test
+    void rejectCustomerTransactionsWhenCustomerIdIsBlank() throws Exception {
+
+        mockMvc.perform(
+                        get("/api/transactions")
+                                .param("customerId", "")
+                )
+                .andExpect(status().isBadRequest());
+    }
 }
