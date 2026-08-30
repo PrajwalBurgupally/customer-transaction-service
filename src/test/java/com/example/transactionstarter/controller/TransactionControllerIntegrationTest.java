@@ -66,7 +66,7 @@ class TransactionControllerIntegrationTest {
                                 .content(requestBody)
                 )
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value("400"))
+                .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.message")
                         .value("Transaction amount must not exceed 100000.00"));
     }
@@ -97,7 +97,7 @@ class TransactionControllerIntegrationTest {
                                 .content(requestBody)
                 )
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.status").value("409"))
+                .andExpect(jsonPath("$.status").value(409))
                 .andExpect(jsonPath("$.message")
                         .value("Transaction ID already exists: TXN-TEST-003"));
     }
@@ -109,7 +109,7 @@ class TransactionControllerIntegrationTest {
                         get("/api/transactions/TXN-DOES-NOT-EXIST")
                 )
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value("404"))
+                .andExpect(jsonPath("$.status").value(404))
                 .andExpect(jsonPath("$.message")
                         .value("Transaction not found: TXN-DOES-NOT-EXIST"));
     }
@@ -195,7 +195,7 @@ class TransactionControllerIntegrationTest {
                                 .content(invalidStatusRequest)
                 )
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value("400"))
+                .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.message")
                         .value("Invalid status transition from COMPLETED to PENDING"));
     }
@@ -245,5 +245,53 @@ class TransactionControllerIntegrationTest {
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].customerId").value("CUST-TEST-003"))
                 .andExpect(jsonPath("$[1].customerId").value("CUST-TEST-003"));
+    }
+
+    @Test
+    void rejectTransactionWhenTransactionIdIsBlank() throws Exception {
+
+        String requestBody = """
+                {
+                    "transactionId": "",
+                    "customerId": "CUST-TEST-010",
+                    "amount": 1500.00,
+                    "currency": "INR",
+                    "transactionType": "PAYMENT"
+                }
+                """;
+
+        mockMvc.perform(
+                        post("/api/transactions")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(requestBody)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message")
+                        .value("transactionId: must not be blank"));
+    }
+
+    @Test
+    void rejectTransactionWhenCurrencyIsInvalid() throws Exception {
+
+        String requestBody = """
+                {
+                    "transactionId": "TXN-TEST-011",
+                    "customerId": "CUST-TEST-010",
+                    "amount": 1500.00,
+                    "currency": "USD",
+                    "transactionType": "PAYMENT"
+                }
+                """;
+
+        mockMvc.perform(
+                        post("/api/transactions")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(requestBody)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message")
+                        .value("Request contains invalid or unreadable data"));
     }
 }

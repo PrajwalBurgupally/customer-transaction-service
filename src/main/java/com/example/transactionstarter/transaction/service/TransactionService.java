@@ -28,61 +28,16 @@ public class TransactionService {
 
     public Transaction createTransaction(CreateTransactionRequest request) {
 
-        if (transactionRepository.existsById(request.getTransactionId())) {
-            throw new DuplicateTransactionException(
-                    "Transaction ID already exists: " + request.getTransactionId()
-            );
-        }
-
-        BigDecimal amount = request.getAmount();
-
-        if (amount == null) {
-            throw new InvalidTransactionException(
-                    "Transaction amount is required"
-            );
-        }
-
-        if (amount.compareTo(MIN_AMOUNT) < 0) {
-            throw new InvalidTransactionException(
-                    "Transaction amount must be at least 1.00"
-            );
-        }
-
-        if (amount.compareTo(MAX_AMOUNT) > 0) {
-            throw new InvalidTransactionException(
-                    "Transaction amount must not exceed 100000.00"
-            );
-        }
-
-        if (amount.stripTrailingZeros().scale() > 2) {
-            throw new InvalidTransactionException(
-                    "Transaction amount must have at most 2 decimal places"
-            );
-        }
-
-        if (request.getCurrency() == null) {
-            throw new InvalidTransactionException(
-                    "Currency is required"
-            );
-        }
-
-        if (request.getCurrency() != Currency.INR) {
-            throw new InvalidTransactionException(
-                    "Only INR transactions are supported"
-            );
-        }
-
-        if (request.getTransactionType() == null) {
-            throw new InvalidTransactionException(
-                    "Transaction type is required"
-            );
-        }
+        checkForDuplicateTransactionId(request.getTransactionId());
+        validateAmount(request.getAmount());
+        validateCurrency(request.getCurrency());
+        validateTransactionType(request);
 
         Transaction transaction = new Transaction();
 
         transaction.setTransactionId(request.getTransactionId());
         transaction.setCustomerId(request.getCustomerId());
-        transaction.setAmount(amount);
+        transaction.setAmount(request.getAmount());
         transaction.setCurrency(request.getCurrency());
         transaction.setTransactionType(request.getTransactionType());
         transaction.setTransactionStatus(TransactionStatus.PENDING);
@@ -131,6 +86,66 @@ public class TransactionService {
     public List<Transaction> getCustomerTransactions(String customerId) {
 
         return transactionRepository.findByCustomerId(customerId);
+    }
+
+    private void checkForDuplicateTransactionId(String transactionId) {
+
+        if (transactionRepository.existsById(transactionId)) {
+            throw new DuplicateTransactionException(
+                    "Transaction ID already exists: " + transactionId
+            );
+        }
+    }
+
+    private void validateAmount(BigDecimal amount) {
+
+        if (amount == null) {
+            throw new InvalidTransactionException(
+                    "Transaction amount is required"
+            );
+        }
+
+        if (amount.compareTo(MIN_AMOUNT) < 0) {
+            throw new InvalidTransactionException(
+                    "Transaction amount must be at least 1.00"
+            );
+        }
+
+        if (amount.compareTo(MAX_AMOUNT) > 0) {
+            throw new InvalidTransactionException(
+                    "Transaction amount must not exceed 100000.00"
+            );
+        }
+
+        if (amount.stripTrailingZeros().scale() > 2) {
+            throw new InvalidTransactionException(
+                    "Transaction amount must have at most 2 decimal places"
+            );
+        }
+    }
+
+    private void validateCurrency(Currency currency) {
+
+        if (currency == null) {
+            throw new InvalidTransactionException(
+                    "Currency is required"
+            );
+        }
+
+        if (currency != Currency.INR) {
+            throw new InvalidTransactionException(
+                    "Only INR transactions are supported"
+            );
+        }
+    }
+
+    private void validateTransactionType(CreateTransactionRequest request) {
+
+        if (request.getTransactionType() == null) {
+            throw new InvalidTransactionException(
+                    "Transaction type is required"
+            );
+        }
     }
 
     private boolean isValidStatusTransition(
