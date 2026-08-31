@@ -413,6 +413,7 @@ class TransactionControllerIntegrationTest {
                 .andExpect(jsonPath("$.message")
                         .value("status: must not be null"));
     }
+
     @Test
     void rejectCustomerTransactionsWhenCustomerIdIsBlank() throws Exception {
 
@@ -421,5 +422,29 @@ class TransactionControllerIntegrationTest {
                                 .param("customerId", "")
                 )
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void rejectTransactionWhenAmountIsJustAboveMaximum() throws Exception {
+
+        String requestBody = """
+                {
+                    "transactionId": "TXN-TEST-016",
+                    "customerId": "CUST-TEST-016",
+                    "amount": 100000.01,
+                    "currency": "INR",
+                    "transactionType": "PAYMENT"
+                }
+                """;
+
+        mockMvc.perform(
+                        post("/api/transactions")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(requestBody)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message")
+                        .value("Transaction amount must not exceed 100000.00"));
     }
 }
