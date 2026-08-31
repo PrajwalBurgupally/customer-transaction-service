@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
             DuplicateTransactionException exception) {
 
         return new ErrorResponse(
-                409,
+                HttpStatus.CONFLICT.value(),
                 exception.getMessage()
         );
     }
@@ -31,7 +31,7 @@ public class GlobalExceptionHandler {
             InvalidTransactionException exception) {
 
         return new ErrorResponse(
-                400,
+                HttpStatus.BAD_REQUEST.value(),
                 exception.getMessage()
         );
     }
@@ -42,7 +42,7 @@ public class GlobalExceptionHandler {
             TransactionNotFoundException exception) {
 
         return new ErrorResponse(
-                404,
+                HttpStatus.NOT_FOUND.value(),
                 exception.getMessage()
         );
     }
@@ -61,7 +61,7 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.joining(", "));
 
         return new ErrorResponse(
-                400,
+                HttpStatus.BAD_REQUEST.value(),
                 message
         );
     }
@@ -81,7 +81,7 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.joining(", "));
 
         return new ErrorResponse(
-                400,
+                HttpStatus.BAD_REQUEST.value(),
                 message
         );
     }
@@ -92,7 +92,7 @@ public class GlobalExceptionHandler {
             HttpMessageNotReadableException exception) {
 
         return new ErrorResponse(
-                400,
+                HttpStatus.BAD_REQUEST.value(),
                 "Request contains invalid or unreadable data"
         );
     }

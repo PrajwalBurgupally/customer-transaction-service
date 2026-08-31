@@ -3,7 +3,12 @@ package com.example.transactionstarter.transaction.entity;
 import com.example.transactionstarter.transaction.enums.Currency;
 import com.example.transactionstarter.transaction.enums.TransactionStatus;
 import com.example.transactionstarter.transaction.enums.TransactionType;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
 
@@ -12,19 +17,25 @@ import java.math.BigDecimal;
 public class Transaction {
 
     @Id
+    @Column(nullable = false)
     private String transactionId;
 
+    @Column(nullable = false)
     private String customerId;
 
+    @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Currency currency;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TransactionType transactionType;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TransactionStatus transactionStatus;
 
     public Transaction() {

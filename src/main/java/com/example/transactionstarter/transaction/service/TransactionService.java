@@ -11,6 +11,7 @@ import com.example.transactionstarter.transaction.exception.InvalidTransactionEx
 import com.example.transactionstarter.transaction.exception.TransactionNotFoundException;
 import com.example.transactionstarter.transaction.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -27,6 +28,7 @@ public class TransactionService {
         this.transactionRepository = transactionRepository;
     }
 
+    @Transactional
     public Transaction createTransaction(CreateTransactionRequest request) {
 
         checkForDuplicateTransactionId(request.getTransactionId());
@@ -56,6 +58,7 @@ public class TransactionService {
                 );
     }
 
+    @Transactional
     public Transaction updateTransactionStatus(
             String transactionId,
             UpdateTransactionStatusRequest request) {
