@@ -416,7 +416,77 @@ This implementation is intentionally scoped to the requirements of the coding ex
 - Production database configuration
 ## AI Usage Disclosure
 
-AI assistance was used during development for guidance on Spring Boot implementation, debugging, validation, testing, Git workflow, and documentation.
+AI assistance was used during development through ChatGPT.
 
-The business assumptions, implementation choices, code changes, and final validation were reviewed during the development process.
- 
+### How AI was used
+
+AI was used for:
+
+- Guidance on Spring Boot project structure and implementation
+- Writing and reviewing Java/Spring Boot code
+- Designing integration tests using JUnit 5 and MockMvc
+- Debugging compilation and runtime errors
+- Git workflow guidance
+- Reviewing validation and exception-handling design
+- Drafting and reviewing project documentation
+
+### Significant AI-generated or suggested work
+
+AI suggested and helped draft several parts of the implementation, including:
+
+- Transaction DTOs
+- Transaction service logic
+- REST controller endpoints
+- Custom exceptions and centralized exception handling
+- Integration tests
+- Validation rules
+- Status-transition logic
+- README documentation
+
+The generated code was reviewed and tested before being retained.
+
+### What I changed, corrected, or rejected
+
+I reviewed the generated suggestions against the actual project and changed them when necessary.
+
+Examples include:
+
+- Moving `DuplicateTransactionException` from the incorrect `entity` package into the `exception` package.
+- Correcting `TransactionType.java` after an enum declaration/file-name mismatch caused a compilation error.
+- Correcting the test assertions for the `status` field after changing the error response from a String status to an integer status.
+- Fixing test-file structure and misplaced braces when compilation errors such as `reached end of file while parsing` occurred.
+- Adding `ConstraintViolationException` handling after testing revealed that blank `customerId` requests were producing an unhandled validation exception.
+- Reviewing the suggested status-transition rules and choosing `PENDING → COMPLETED` and `PENDING → FAILED`, while treating `COMPLETED` and `FAILED` as terminal states.
+
+### What AI got wrong and how I fixed it
+
+During development, some AI-generated suggestions were not correct for the actual project state.
+
+A significant example was the customer ID validation test. The initial test expected a normal `400` response, but the actual application produced a `ConstraintViolationException`. I inspected the Maven test failure, identified that method-parameter validation was using `ConstraintViolationException`, and added an appropriate handler in `GlobalExceptionHandler`.
+
+There were also several instances where generated test code was inserted with incorrect class braces, causing compilation errors. I replaced the affected test class with a complete corrected version and reran the full Maven test suite.
+
+These issues were not accepted blindly; the implementation was corrected based on compiler output, runtime behavior, and test results.
+
+### How the final result was verified
+
+The final implementation was verified by:
+
+- Running `.\mvnw.cmd clean test`
+- Maintaining a suite of 16 automated tests
+- Verifying successful and failure scenarios through MockMvc
+- Manually testing the REST APIs using PowerShell
+- Verifying duplicate transaction handling
+- Verifying validation and error responses
+- Verifying valid and invalid status transitions
+- Cloning the final GitHub repository into a separate clean directory
+- Running the complete test suite from the clean clone
+
+Final verification result:
+
+```text
+Tests run: 16
+Failures: 0
+Errors: 0
+Skipped: 0
+BUILD SUCCESS
